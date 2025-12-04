@@ -1,0 +1,30 @@
+# WordPress
+wp-config.php
+*.log
+
+# Docker
+.env
+*.env.local
+docker-compose.override.yml
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Dependency directories
+node_modules/
+vendor/
+
+# Backup files
+*.bak
+*.backup
+
+# Temporary files
+tmp/
+temp/
