@@ -17,7 +17,11 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'master', url: 'https://github.com/tu-usuario/wordpress-ci-cd.git'
+                git(
+                    url: 'https://github.com/Sm0df/wordpress-ci-cd.git',
+                    branch: 'main',
+                    credentialsId: 'git-token' // <-- Aquí se usa tu GitHub token
+                )
             }
         }
         
@@ -172,3 +176,4 @@ pipeline {
         }
     }
 }
+
