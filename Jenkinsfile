@@ -14,12 +14,14 @@ pipeline {
             }
         }
 
-        stage('Check Docker') {
+        stage('Fix Permissions') {
             steps {
                 script {
-                    echo "Verificando Docker y Docker Compose..."
-                    sh 'docker --version'
-                    sh 'docker compose version || docker-compose --version'
+                    // Ajustamos permisos de WordPress para evitar errores dentro del contenedor
+                    sh '''
+                        sudo chown -R $USER:$USER wordpress
+                        sudo chmod -R 755 wordpress
+                    '''
                 }
             }
         }
@@ -27,9 +29,7 @@ pipeline {
         stage('Build Docker') {
             steps {
                 script {
-                    // Detecta si se usa docker compose v2 o v1
-                    def composeCmd = sh(script: "docker compose version > /dev/null 2>&1 && echo 'docker compose' || echo 'docker-compose'", returnStdout: true).trim()
-                    sh "${composeCmd} build"
+                    sh 'docker compose build'
                 }
             }
         }
@@ -37,8 +37,7 @@ pipeline {
         stage('Up Docker') {
             steps {
                 script {
-                    def composeCmd = sh(script: "docker compose version > /dev/null 2>&1 && echo 'docker compose' || echo 'docker-compose'", returnStdout: true).trim()
-                    sh "${composeCmd} up -d"
+                    sh 'docker compose up -d'
                 }
             }
         }
@@ -46,8 +45,8 @@ pipeline {
         stage('Run Tests') {
             steps {
                 script {
-                    sh 'echo "Ejecutando pruebas..."'
                     // Aquí puedes agregar tus pruebas automáticas
+                    sh 'echo "Ejecutando pruebas..."'
                 }
             }
         }
@@ -55,22 +54,9 @@ pipeline {
         stage('Teardown') {
             steps {
                 script {
-                    def composeCmd = sh(script: "docker compose version > /dev/null 2>&1 && echo 'docker compose' || echo 'docker-compose'", returnStdout: true).trim()
-                    sh "${composeCmd} down"
+                    sh 'docker compose down'
                 }
             }
-        }
-    }
-
-    post {
-        always {
-            echo "Pipeline finalizado."
-        }
-        success {
-            echo "Pipeline ejecutado correctamente."
-        }
-        failure {
-            echo "Pipeline falló. Revisar logs."
         }
     }
 }
