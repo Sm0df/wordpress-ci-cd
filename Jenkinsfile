@@ -17,10 +17,11 @@ pipeline {
         stage('Fix Permissions') {
             steps {
                 script {
-                    // Ajustamos permisos de WordPress para evitar errores dentro del contenedor
+                    // Ajusta permisos sin sudo dentro del contenedor
                     sh '''
-                        sudo chown -R $USER:$USER wordpress
-                        sudo chmod -R 755 wordpress
+                        echo "Ajustando permisos de Wordpress..."
+                        chown -R $(whoami):$(whoami) wordpress || true
+                        chmod -R 755 wordpress || true
                     '''
                 }
             }
@@ -29,6 +30,7 @@ pipeline {
         stage('Build Docker') {
             steps {
                 script {
+                    // Usando docker compose nativo sin guion
                     sh 'docker compose build'
                 }
             }
@@ -45,7 +47,7 @@ pipeline {
         stage('Run Tests') {
             steps {
                 script {
-                    // Aquí puedes agregar tus pruebas automáticas
+                    // Aquí tus pruebas automáticas
                     sh 'echo "Ejecutando pruebas..."'
                 }
             }
