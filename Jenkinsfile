@@ -1,56 +1,51 @@
-// Jenkinsfile SIMPLE que SÍ funciona
 pipeline {
-    agent {
-        docker {
-            image 'docker:latest'
-            args '-v /var/run/docker.sock:/var/run/docker.sock'
-        }
+    agent any
+
+    environment {
+        GIT_CREDENTIALS_ID = 'github-token'
     }
-    
+
     stages {
-        stage('Show Info') {
+        stage('Checkout') {
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/Sm0df/wordpress-ci-cd.git',
+                    credentialsId: "${env.GIT_CREDENTIALS_ID}"
+            }
+        }
+
+        stage('Build Docker') {
             steps {
                 script {
-                    echo '🎉 ¡Pipeline funcionando!'
-                    sh '''
-                    echo "=== INFORMACIÓN ==="
-                    echo "Workspace: ${WORKSPACE}"
-                    echo "Build ID: ${BUILD_ID}"
-                    echo ""
-                    echo "Contenido del repositorio:"
-                    ls -la
-                    echo ""
-                    echo "Docker funciona:"
-                    docker --version
-                    docker run --rm alpine echo "✅ ¡Docker funciona perfectamente!"
-                    '''
+                    sh 'docker-compose build'
                 }
             }
         }
-        
-        stage('Build Test') {
+
+        stage('Up Docker') {
             steps {
                 script {
-                    sh '''
-                    echo "🔨 Construyendo imagen de prueba..."
-                    cat > Dockerfile.test << 'DF'
-FROM alpine:latest
-RUN echo "Imagen construida por Jenkins CI/CD" > /message.txt
-CMD cat /message.txt
-DF
-                    
-                    docker build -t jenkins-test:${BUILD_ID} -f Dockerfile.test .
-                    docker run --rm jenkins-test:${BUILD_ID}
-                    '''
+                    sh 'docker-compose up -d'
                 }
             }
         }
-    }
-    
-    post {
-        always {
-            echo "🏁 Pipeline ${currentBuild.currentResult}"
-            sh 'docker rmi jenkins-test:${BUILD_ID} 2>/dev/null || true'
+
+        stage('Run Tests') {
+            steps {
+                script {
+                    // Aquí puedes agregar tus pruebas automáticas
+                    sh 'echo "Ejecutando pruebas..."'
+                }
+            }
+        }
+
+        stage('Teardown') {
+            steps {
+                script {
+                    sh 'docker-compose down'
+                }
+            }
         }
     }
 }
+
