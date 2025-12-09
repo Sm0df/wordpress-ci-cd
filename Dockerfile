@@ -17,7 +17,7 @@ COPY scripts/ /usr/local/bin/
 RUN chmod +x /usr/local/bin/*.sh
 
 # Copiar configuración de WordPress
-COPY wordpress/wp-config.php /usr/src/wordpress/
+#COPY wordpress/wp-config.php /usr/src/wordpress/
 
 # Establecer permisos
 RUN chown -R www-data:www-data /usr/src/wordpress
