@@ -6,6 +6,7 @@ pipeline {
     }
 
     stages {
+
         stage('Checkout') {
             steps {
                 git branch: 'feature/nueva-funcionalidad',
@@ -16,15 +17,16 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('sonarqube-server') {
-                    sh '''
-                        sonar-scanner \
-                        -Dsonar.projectKey=wordpress-ci \
-                        -Dsonar.sources=. \
-                        -Dsonar.host.url=$SONAR_HOST_URL \
-                        -Dsonar.login=$SONAR_AUTH_TOKEN
-                    '''
-                }
+                sh '''
+                    echo "squ_57beb64f7cfa4cf87e76e5366802f064dd4bd8ca" > .sonar-token
+                    chmod 600 .sonar-token
+
+                    sonar-scanner \
+                      -Dsonar.projectKey=wordpress-ci-cd \
+                      -Dsonar.sources=. \
+                      -Dsonar.host.url=http://13.221.202.204:9000 \
+                      -Dsonar.token=$(cat .sonar-token)
+                '''
             }
         }
 
