@@ -14,10 +14,23 @@ pipeline {
             }
         }
 
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('sonarqube-server') {
+                    sh '''
+                        sonar-scanner \
+                        -Dsonar.projectKey=wordpress-ci \
+                        -Dsonar.sources=. \
+                        -Dsonar.host.url=$SONAR_HOST_URL \
+                        -Dsonar.login=$SONAR_AUTH_TOKEN
+                    '''
+                }
+            }
+        }
+
         stage('Fix Permissions') {
             steps {
                 script {
-                    // Cambio mínimo: solo aseguramos permisos de carpetas que SÍ existen
                     sh '''
                         echo "Ajustando permisos de WordPress..."
                         if [ -d wordpress ]; then
